@@ -1,0 +1,315 @@
+# Motubas Project Instructions
+
+## Project Overview
+Motubas is a freemium web application for digital service record books for old cars (5+ years) in Indonesia. Target market: Mobil Tua Bangka (Motuba) segment.
+
+## Primary Objectives
+
+### MVP Features (In Priority Order)
+
+1. **Car Management**
+   - Allow users to add their car (max 1 for FREE tier)
+   - Store: make, model, year, license plate, current mileage
+   - MUST enforce 1-car limit for FREE tier users
+   - Allow editing car details and updating mileage
+   - Files to create:
+     - `app/(dashboard)/cars/page.tsx`
+     - `app/(dashboard)/cars/add/page.tsx`
+     - `app/(dashboard)/cars/[id]/edit/page.tsx`
+     - `app/api/cars/route.ts`
+     - `app/actions/cars.ts`
+     - `components/car-card.tsx`
+
+2. **Service Record Management**
+   - Create, read, update service records
+   - MUST require invoice photo if serviceCost exists AND NOT self-service
+   - Client-side image compression (max 1MB using browser-image-compression)
+   - Upload to Vercel Blob Storage
+   - Display service history with timestamp transparency (show created_at vs updated_at)
+   - Auto-create maintenance reminders when service is logged
+   - Filter by service type, date, location
+   - Files to create:
+     - `app/(dashboard)/cars/[id]/services/page.tsx`
+     - `app/(dashboard)/cars/[id]/services/add/page.tsx`
+     - `app/(dashboard)/cars/[id]/services/[serviceId]/page.tsx`
+     - `app/api/services/route.ts`
+     - `app/api/upload/route.ts`
+     - `app/actions/services.ts`
+     - `components/service-record-card.tsx`
+     - `components/service-form.tsx`
+     - `components/invoice-upload.tsx`
+
+3. **Maintenance Reminders**
+   - Auto-generate reminders based on service records
+   - Display upcoming reminders (sorted by urgency)
+   - Visual indicators: due soon (within 7 days or 500km), overdue
+   - Mark as completed
+   - Use Indonesian labels from `lib/reminder-calculator.ts`
+   - Files to create:
+     - `app/(dashboard)/reminders/page.tsx`
+     - `app/api/reminders/route.ts`
+     - `components/reminder-card.tsx`
+
+4. **Om Motu AI Assistant**
+   - Chat interface using Google Gemini 2.5 Flash
+   - Support text and image inputs (for visual diagnostics)
+   - Credit system: 10 queries/month for FREE tier, unlimited for PREMIUM
+   - MUST check aiCreditsRemaining before allowing queries
+   - MUST decrement credits only for FREE tier users
+   - Store conversation history in database
+   - Provide bengkel recommendations (if available)
+   - ALL responses MUST be in Bahasa Indonesia
+   - Files to create:
+     - `app/(dashboard)/om-motu/page.tsx`
+     - `app/api/ai/chat/route.ts`
+     - `components/om-motu-chat.tsx`
+     - `lib/ai-prompts.ts`
+
+5. **Dashboard Analytics**
+   - Display total service cost
+   - Average cost per service
+   - Cost breakdown by service type
+   - Monthly trend chart (using recharts)
+   - Recent service history (last 5)
+   - Upcoming reminders (next 3)
+   - Files to update/create:
+     - Update `app/(dashboard)/dashboard/page.tsx`
+     - `components/dashboard-stats.tsx`
+     - `components/service-chart.tsx`
+     - `lib/analytics.ts`
+
+6. **User Profile**
+   - View and update user information
+   - Change password
+   - View subscription tier and AI credits remaining
+   - Files to create:
+     - `app/(dashboard)/profile/page.tsx`
+     - `app/actions/profile.ts`
+
+## Critical Requirements
+
+### Language
+- **UI Text:** MUST be in Bahasa Indonesia
+- **Code/System:** English (variables, functions, comments)
+- **Error Messages:** Bahasa Indonesia for users
+- Use labels from `lib/reminder-calculator.ts` and service type mappings
+
+### Freemium Enforcement
+- **FREE Tier Limits:**
+  - Max 1 car (check using `canAddCar()` from `lib/subscription.ts`)
+  - 10 AI credits per month (check using `canUseAI()`)
+  - No email/push notifications
+- **PREMIUM Tier:**
+  - Unlimited cars
+  - Unlimited AI credits
+  - Email/push notifications (future)
+
+### Data Validation
+- Use Zod schemas for all form validation
+- Invoice photo REQUIRED if serviceCost exists AND NOT isSelfService
+- Custom service type REQUIRED if serviceType === 'CUSTOM'
+- Mileage must be positive numbers
+- Service date can be backdated (show warning if > 1 year old)
+
+### Database Operations
+- ALWAYS use transactions for related operations
+- Use the singleton client from `lib/db.ts`
+- Never expose password hashes in queries
+- Check subscription tier before tier-restricted operations
+- See `skills/prisma/SKILL.md` for query patterns
+
+### Photo Upload Workflow
+1. Client-side validation (file type, size < 10MB before compression)
+2. Client-side compression to max 1MB (browser-image-compression)
+3. Show compression progress to user
+4. Upload to Vercel Blob Storage
+5. Store URL in database
+- See `skills/service-records/PHOTO-UPLOAD.md` for implementation
+
+### Service Record Workflow
+1. Validate input data with Zod
+2. Handle invoice photo upload (if provided)
+3. Create service record in database
+4. Update car mileage (if new mileage > current)
+5. Create/update maintenance reminders
+- See `skills/service-records/SKILL.md` for complete workflow
+
+### AI Assistant Requirements
+- MUST use Google Gemini 2.5 Flash model
+- System prompt defines Om Motu personality (helpful, Indonesian, safety-first)
+- Check credits before processing query
+- Support image upload for visual diagnostics
+- Store conversation history for context
+- Provide bengkel recommendations if available
+- See `skills/ai-assistant/SKILL.md` for implementation
+
+## Code Style Guidelines
+
+### Server Components by Default
+- Use Server Components unless you need client-side features
+- Only add 'use client' for: forms, hooks, browser APIs, interactivity
+- Fetch data in Server Components, never in Client Components
+
+### File Organization
+- Server Actions in `app/actions/`
+- API routes in `app/api/`
+- UI components in `components/`
+- Utility functions in `lib/`
+
+### Naming Conventions
+- Components: PascalCase
+- Server Actions: camelCase
+- Files: kebab-case
+- Database: snake_case (tables), camelCase (Prisma schema)
+
+### Error Handling
+- Always return `{ error: string }` or `{ success: true }` from Server Actions
+- Use Indonesian error messages for users
+- Log detailed errors to console
+- Handle Prisma errors gracefully (P2002, P2025, P2003)
+
+### Indonesian Formatting
+- Currency: `formatCurrency()` from lib/utils → "Rp 50.000"
+- Dates: `formatDate()` → "31 Desember 2025"
+- DateTime: `formatDateTime()` → "31 Desember 2025, 14:30"
+
+## Implementation Resources
+
+### Agent Skills (Detailed Guides)
+- `skills/prisma/SKILL.md` - Database query patterns
+- `skills/service-records/SKILL.md` - Service CRUD workflow
+- `skills/service-records/PHOTO-UPLOAD.md` - Image upload details
+- `skills/ai-assistant/SKILL.md` - Gemini API integration
+- `skills/ai-assistant/CHAT-COMPONENT.md` - Chat UI implementation
+
+### Core Files Reference
+- `lib/db.ts` - Prisma client (use this, don't create new instances)
+- `lib/utils.ts` - Formatters (currency, date, cn for Tailwind)
+- `lib/subscription.ts` - Freemium logic (canAddCar, canUseAI)
+- `lib/reminder-calculator.ts` - Reminder intervals and due dates
+- `auth.ts` - Auth.js configuration
+- `middleware.ts` - Route protection
+
+### Database Schema
+- See `prisma/schema.prisma` for complete schema
+- Important enums: ServiceType, ReminderType, SubscriptionTier
+- Key relationships documented in schema
+
+## Development Workflow
+
+### Before Starting a Feature
+1. Read relevant SKILL.md from `skills/` directory
+2. Check `PROJECT-STATUS.md` for file list
+3. Review similar patterns in existing code
+4. Use TypeScript strictly (no `any` types)
+
+### Before Committing
+1. Run `npm run lint` - fix all errors
+2. Run `npx prisma format` - format schema
+3. Run `npx prisma validate` - check schema
+4. Test the feature manually
+5. Verify freemium limits work correctly
+
+### Testing Checklist
+- [ ] Authentication flow (login, register, OAuth)
+- [ ] Free tier limits (1 car, 10 AI credits)
+- [ ] Photo upload and compression
+- [ ] Service record creation with reminders
+- [ ] Indonesian language UI
+- [ ] Error handling with user-friendly messages
+
+## Technical Notes
+
+### Prisma with Vercel Postgres
+- MUST use PG adapter (already configured in `lib/db.ts`)
+- Always run `npx prisma generate` after schema changes
+- Use transactions for multi-step operations
+
+### Auth.js v5
+- Use `auth()` function, not `getServerSession()`
+- Middleware uses `auth()` callback
+- Session strategy is 'jwt' for serverless
+
+### Image Upload
+- Client-side compression reduces server load
+- Vercel Blob handles CDN and caching
+- Store images with user ID in path for organization
+
+### Gemini Flash API
+- Model: `gemini-2.5-flash`
+- Supports text and image inputs
+- Rate limit: 1 request per 5 seconds per user
+- Cost-effective: ~$0.075 per 1M tokens
+
+## Success Criteria
+
+### MVP Complete When:
+- [ ] Users can add 1 car (FREE tier enforced)
+- [ ] Users can create service records with photo upload
+- [ ] Invoice photo required when cost entered (except self-service)
+- [ ] Maintenance reminders auto-generated from services
+- [ ] Reminders display with urgency indicators
+- [ ] Om Motu AI responds in Indonesian with 10 credit limit
+- [ ] Dashboard shows service analytics
+- [ ] All UI text is in Bahasa Indonesia
+- [ ] Free tier limits enforced everywhere
+- [ ] Ready to deploy to Vercel
+
+## Post-MVP Features (Future)
+- Premium subscription with payment (Midtrans/Xendit)
+- Email verification
+- Password reset
+- Export service records to PDF
+- Advanced filters and search
+- Bengkel partnership dashboard
+- Service validation by bengkels
+- Mobile apps (React Native/Flutter)
+- Push notifications
+- Community features
+
+---
+
+## Architecture Decision Records (ADRs)
+
+All significant architectural and technical decisions are documented in `docs/adr/`.
+
+### ADR Index
+
+| ADR | Title | Status | Date | Summary |
+|-----|-------|--------|------|---------|
+| [0001](docs/adr/0001-use-architecture-decision-records.md) | Use Architecture Decision Records | Accepted | 2025-12-31 | Establish ADR practice for documenting architectural decisions |
+| [0002](docs/adr/0002-choose-nextjs-15-as-frontend-framework.md) | Choose Next.js 15 as Frontend Framework | Accepted | 2025-12-31 | Next.js 15 with App Router chosen for SSR, SEO, and Vercel optimization |
+| [0003](docs/adr/0003-use-prisma-7-with-postgresql.md) | Use Prisma 7 with PostgreSQL | Accepted | 2025-12-31 | Prisma 7 ORM with PostgreSQL for type-safe database operations |
+| [0004](docs/adr/0004-use-google-gemini-flash-for-ai-assistant.md) | Use Google Gemini Flash for AI Assistant | Accepted | 2025-12-31 | Gemini 2.5 Flash chosen for cost-effective, multimodal AI assistant |
+| [0005](docs/adr/0005-use-authjs-v5-for-authentication.md) | Use Auth.js v5 for Authentication | Accepted | 2025-12-31 | Auth.js v5 for email/password and OAuth authentication |
+| [0006](docs/adr/0006-adopt-development-best-practices.md) | Adopt Development Best Practices | Accepted | 2025-12-31 | TDD for critical paths, SemVer, Conventional Commits, Gitflow, Diátaxis, Agile sprints |
+| [0007](docs/adr/0007-prisma-7-configuration.md) | Prisma 7 Configuration with prisma.config.ts | Accepted | 2025-12-31 | Database URL moved to prisma.config.ts, driver adapters now stable |
+
+### When to Create an ADR
+
+Create an ADR when making decisions about:
+- Technology choices (frameworks, libraries, databases)
+- Architectural patterns (folder structure, data flow, state management)
+- Development practices (testing strategies, deployment processes)
+- API design (REST patterns, versioning)
+- Security approaches (authentication, authorization, data protection)
+- Third-party integrations (payment, AI, storage services)
+- Performance strategies (caching, optimization)
+- Data modeling approaches
+
+### How to Create an ADR
+
+1. Copy template from `docs/adr/0001-use-architecture-decision-records.md`
+2. Use next sequential number: `docs/adr/XXXX-descriptive-title.md`
+3. Fill in all sections (Context, Decision, Consequences, Alternatives)
+4. Update this index in `.clinerules`
+5. Update index in `docs/adr/README.md`
+6. Commit with message: "docs: add ADR-XXXX [title]"
+
+See `docs/adr/README.md` for detailed ADR guidelines.
+
+---
+
+**Current Status:** Foundation complete, ready for feature implementation
+
+**Next Priority:** Car Management → Service Records → Reminders → AI → Analytics → Profile

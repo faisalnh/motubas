@@ -1,0 +1,230 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SubscriptionTier {
+  FREE
+  PREMIUM
+}
+
+enum ServiceType {
+  OIL_CHANGE
+  BRAKE_SERVICE
+  TIRE_ROTATION
+  ENGINE_CHECK
+  TRANSMISSION
+  GENERAL_SERVICE
+  CUSTOM
+}
+
+enum ReminderType {
+  OIL_CHANGE
+  BRAKE_FLUID
+  COOLANT
+  TRANSMISSION_FLUID
+  TIRE_ROTATION
+  AIR_FILTER
+  SPARK_PLUG
+  TIMING_BELT
+}
+
+enum BengkelRole {
+  OWNER
+  STAFF
+}
+
+model User {
+  id                   String            @id @default(cuid())
+  email                String            @unique
+  password             String?           // Nullable for OAuth users
+  name                 String
+  phone                String?
+  emailVerified        DateTime?
+  image                String?
+  subscriptionTier     SubscriptionTier  @default(FREE)
+  aiCreditsRemaining   Int               @default(10)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  cars                 Car[]
+  aiConversations      AiConversation[]
+  accounts             Account[]
+  sessions             Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Car {
+  id              String              @id @default(cuid())
+  userId          String
+  make            String              // Toyota, Honda, etc.
+  model           String              // Avanza, Jazz, etc.
+  year            Int
+  licensePlate    String
+  currentMileage  Int
+  isPrimary       Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceRecords  ServiceRecord[]
+  reminders       MaintenanceReminder[]
+  aiConversations AiConversation[]
+
+  @@index([userId])
+  @@map("cars")
+}
+
+model ServiceRecord {
+  id                    String       @id @default(cuid())
+  carId                 String
+  serviceDate           DateTime
+  mileageAtService      Int
+  serviceType           ServiceType
+  customServiceType     String?      // For CUSTOM service type
+  description           String       @db.Text
+  partsReplaced         String?      @db.Text
+  nextServiceDueDate    DateTime?
+  nextServiceDueMileage Int?
+  serviceCost           Decimal?     @db.Decimal(10, 2)
+  invoicePhotoUrl       String?
+  serviceLocation       String       // Shop name or "Self Service"
+  isSelfService         Boolean      @default(false)
+  bengkelId             String?
+  isVerified            Boolean      @default(false)
+  verifiedAt            DateTime?
+  verifiedByUserId      String?
+  entryCreatedAt        DateTime     @default(now()) // Original entry time
+  notes                 String?      @db.Text
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  car                   Car          @relation(fields: [carId], references: [id], onDelete: Cascade)
+  bengkel               Bengkel?     @relation(fields: [bengkelId], references: [id])
+  verifiedBy            BengkelUser? @relation(fields: [verifiedByUserId], references: [id])
+
+  @@index([carId])
+  @@index([serviceDate])
+  @@map("service_records")
+}
+
+model MaintenanceReminder {
+  id                  String       @id @default(cuid())
+  carId               String
+  reminderType        ReminderType
+  lastServiceDate     DateTime?
+  lastServiceMileage  Int?
+  dueDate             DateTime?
+  dueMileage          Int?
+  isNotified          Boolean      @default(false) // Premium only
+  isCompleted         Boolean      @default(false)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  car                 Car          @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+  @@index([isCompleted])
+  @@map("maintenance_reminders")
+}
+
+model Bengkel {
+  id              String          @id @default(cuid())
+  name            String
+  address         String          @db.Text
+  city            String
+  province        String
+  phone           String
+  email           String
+  isPartner       Boolean         @default(false)
+  specialty       String[]        // ["engine", "transmission", "brake"]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  users           BengkelUser[]
+  serviceRecords  ServiceRecord[]
+  aiConversations AiConversation[]
+
+  @@map("bengkels")
+}
+
+model BengkelUser {
+  id              String          @id @default(cuid())
+  bengkelId       String
+  email           String          @unique
+  password        String
+  name            String
+  role            BengkelRole     @default(STAFF)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  bengkel         Bengkel         @relation(fields: [bengkelId], references: [id], onDelete: Cascade)
+  verifiedRecords ServiceRecord[]
+
+  @@index([bengkelId])
+  @@map("bengkel_users")
+}
+
+model AiConversation {
+  id                    String   @id @default(cuid())
+  userId                String
+  carId                 String?
+  conversationHistory   Json     // Array of messages
+  issueDescription      String   @db.Text
+  recommendedBengkelId  String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car                   Car?     @relation(fields: [carId], references: [id], onDelete: SetNull)
+  recommendedBengkel    Bengkel? @relation(fields: [recommendedBengkelId], references: [id])
+
+  @@index([userId])
+  @@map("ai_conversations")
+}
