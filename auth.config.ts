@@ -1,52 +1,47 @@
 import type { NextAuthConfig } from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
-import Google from 'next-auth/providers/google';
-import { compare } from 'bcryptjs';
-import { db } from '@/lib/db';
-import { z } from 'zod';
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
+// Edge-compatible auth config (no Node.js modules like bcrypt or db)
+// This is used by middleware which runs on edge runtime
+export const authConfig = {
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
+  providers: [], // Providers are configured in auth.ts for Node.js runtime
+  callbacks: {
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
 
-export default {
-  providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
-    Credentials({
-      async authorize(credentials) {
-        const validatedFields = loginSchema.safeParse(credentials);
+      const isAuthRoute = nextUrl.pathname.startsWith('/login') ||
+        nextUrl.pathname.startsWith('/register');
+      const isDashboardRoute = nextUrl.pathname.startsWith('/dashboard') ||
+        nextUrl.pathname.startsWith('/cars') ||
+        nextUrl.pathname.startsWith('/reminders') ||
+        nextUrl.pathname.startsWith('/om-motu') ||
+        nextUrl.pathname.startsWith('/profile');
 
-        if (!validatedFields.success) {
-          return null;
-        }
+      // Redirect to dashboard if already logged in and trying to access auth pages
+      if (isAuthRoute && isLoggedIn) {
+        return Response.redirect(new URL('/dashboard', nextUrl));
+      }
 
-        const { email, password } = validatedFields.data;
+      // Redirect to login if not logged in and trying to access protected routes
+      if (isDashboardRoute && !isLoggedIn) {
+        return Response.redirect(new URL('/login', nextUrl));
+      }
 
-        const user = await db.user.findUnique({
-          where: { email },
-        });
-
-        if (!user || !user.password) {
-          return null;
-        }
-
-        const passwordMatch = await compare(password, user.password);
-
-        if (!passwordMatch) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-        };
-      },
-    }),
-  ],
+      return true;
+    },
+    async session({ session, token }) {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+    async jwt({ token }) {
+      return token;
+    },
+  },
 } satisfies NextAuthConfig;
+
+export default authConfig;
