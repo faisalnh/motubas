@@ -29,10 +29,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 p-4">
+      <Card className="w-full max-w-md border-slate-200 shadow-xl">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Masuk ke Motubas</CardTitle>
+          <CardTitle className="text-2xl text-center text-slate-900">Masuk ke Motubas</CardTitle>
           <CardDescription className="text-center">
             Masuk untuk mengakses buku service digital Anda
           </CardDescription>

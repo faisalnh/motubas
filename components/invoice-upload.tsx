@@ -116,8 +116,8 @@ export function InvoiceUpload({ onUploadComplete, initialUrl, disabled }: Invoic
                     <label
                         htmlFor="invoice-upload"
                         className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${uploading || disabled
-                                ? 'bg-gray-100 border-gray-300 cursor-not-allowed'
-                                : 'bg-gray-50 border-gray-300 hover:bg-gray-100 hover:border-gray-400'
+                            ? 'bg-gray-100 border-gray-300 cursor-not-allowed'
+                            : 'bg-gray-50 border-gray-300 hover:bg-gray-100 hover:border-gray-400'
                             }`}
                     >
                         {uploading ? (
@@ -127,7 +127,7 @@ export function InvoiceUpload({ onUploadComplete, initialUrl, disabled }: Invoic
                                 </p>
                                 <div className="w-full max-w-xs mx-auto bg-gray-200 rounded-full h-2">
                                     <div
-                                        className="bg-blue-600 h-2 rounded-full transition-all"
+                                        className="bg-orange-500 h-2 rounded-full transition-all"
                                         style={{ width: `${compressionProgress}%` }}
                                     />
                                 </div>

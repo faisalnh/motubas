@@ -3,7 +3,14 @@ import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { ReminderCard } from '@/components/reminder-card';
 import { isReminderOverdue, isReminderDueSoon } from '@/lib/reminder-calculator';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, CalendarDays } from 'lucide-react';
+import { Metadata } from 'next';
+import { EmptyState } from '@/components/ui/empty-state';
+
+export const metadata: Metadata = {
+    title: 'Pengingat Service | Motubas',
+    description: 'Lihat jadwal perawatan mobil Anda dan jangan sampai terlewat.',
+};
 
 export default async function RemindersPage() {
     const session = await auth();
@@ -60,8 +67,8 @@ export default async function RemindersPage() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-gray-900">Pengingat Service</h1>
-                <p className="text-gray-600 mt-1">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Pengingat Service</h1>
+                <p className="text-slate-500 dark:text-slate-400 mt-1">
                     Jadwal perawatan mobil Anda
                 </p>
             </div>
@@ -69,32 +76,29 @@ export default async function RemindersPage() {
             {/* Summary Stats */}
             {reminders.length > 0 && (
                 <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-                        <p className="text-2xl font-bold text-red-700">{overdueCount}</p>
-                        <p className="text-sm text-red-600">Terlambat</p>
+                    <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg p-4 text-center">
+                        <p className="text-2xl font-bold text-red-700 dark:text-red-400">{overdueCount}</p>
+                        <p className="text-sm text-red-600 dark:text-red-500/80">Terlambat</p>
                     </div>
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
-                        <p className="text-2xl font-bold text-orange-700">{dueSoonCount}</p>
-                        <p className="text-sm text-orange-600">Segera</p>
+                    <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 rounded-lg p-4 text-center">
+                        <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">{dueSoonCount}</p>
+                        <p className="text-sm text-orange-600 dark:text-orange-500/80">Segera</p>
                     </div>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                        <p className="text-2xl font-bold text-green-700">{reminders.length - overdueCount - dueSoonCount}</p>
-                        <p className="text-sm text-green-600">Terjadwal</p>
+                    <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 rounded-lg p-4 text-center">
+                        <p className="text-2xl font-bold text-green-700 dark:text-green-400">{reminders.length - overdueCount - dueSoonCount}</p>
+                        <p className="text-sm text-green-600 dark:text-green-500/80">Terjadwal</p>
                     </div>
                 </div>
             )}
 
             {/* Reminders List */}
             {sortedReminders.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-                    <h3 className="mt-4 text-lg font-medium text-gray-900">
-                        Semua Service Terjadwal
-                    </h3>
-                    <p className="mt-2 text-gray-600">
-                        Tidak ada pengingat service yang perlu ditindaklanjuti
-                    </p>
-                </div>
+                <EmptyState
+                    title="Semua Aman!"
+                    description="Tidak ada pengingat service yang perlu ditindaklanjuti saat ini. Kendaraan Anda terpantau sehat."
+                    icon={CheckCircle}
+                    className="border-green-200/50 dark:border-green-900/30 bg-green-50/30 dark:bg-green-950/10"
+                />
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {sortedReminders.map((reminder) => (

@@ -87,8 +87,8 @@ export function ChatInterface({ initialCredits, userTier, userName }: ChatInterf
     const isOutOfCredits = userTier === 'FREE' && typeof credits === 'number' && credits <= 0;
 
     return (
-        <Card className="flex flex-col h-[600px] w-full max-w-4xl mx-auto shadow-lg">
-            <CardHeader className="border-b bg-primary/5">
+        <Card className="flex flex-col h-[600px] w-full max-w-4xl mx-auto shadow-lg dark:bg-slate-900">
+            <CardHeader className="border-b dark:border-slate-800 bg-primary/5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="bg-primary/10 p-2 rounded-full">
@@ -99,7 +99,7 @@ export function ChatInterface({ initialCredits, userTier, userName }: ChatInterf
                             <p className="text-xs text-muted-foreground">Asisten Mekanik Virtual</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full border shadow-sm">
+                    <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-1 rounded-full border dark:border-slate-700 shadow-sm">
                         <span className="text-sm font-medium">
                             Credit: {credits === 'Unlimited' ? '∞' : credits}
                         </span>
@@ -110,21 +110,21 @@ export function ChatInterface({ initialCredits, userTier, userName }: ChatInterf
                 </div>
             </CardHeader>
 
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 dark:bg-slate-950/50">
                 {messages.map((msg, index) => (
                     <div
                         key={index}
                         className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                         <div className={`flex gap-2 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user' ? 'bg-blue-100 text-blue-600' : 'bg-primary/10 text-primary'
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user' ? 'bg-slate-700 dark:bg-slate-600 text-white' : 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400'
                                 }`}>
                                 {msg.role === 'user' ? <UserIcon size={16} /> : <Bot size={16} />}
                             </div>
                             <div
                                 className={`p-3 rounded-lg text-sm ${msg.role === 'user'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-white border shadow-sm text-gray-800'
+                                    ? 'bg-slate-700 dark:bg-slate-600 text-white'
+                                    : 'bg-white dark:bg-slate-800 border dark:border-slate-700 shadow-sm text-gray-800 dark:text-gray-200'
                                     }`}
                             >
                                 {msg.role === 'model' ? (
@@ -144,9 +144,9 @@ export function ChatInterface({ initialCredits, userTier, userName }: ChatInterf
                             <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
                                 <Bot size={16} />
                             </div>
-                            <div className="bg-white border shadow-sm p-3 rounded-lg flex items-center gap-2">
-                                <RefreshCw className="h-4 w-4 animate-spin text-gray-400" />
-                                <span className="text-xs text-gray-500">Om Motu sedang mengetik...</span>
+                            <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 shadow-sm p-3 rounded-lg flex items-center gap-2">
+                                <RefreshCw className="h-4 w-4 animate-spin text-gray-400 dark:text-gray-500" />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Om Motu sedang mengetik...</span>
                             </div>
                         </div>
                     </div>
@@ -154,10 +154,10 @@ export function ChatInterface({ initialCredits, userTier, userName }: ChatInterf
                 <div ref={messagesEndRef} />
             </CardContent>
 
-            <CardFooter className="p-4 border-t bg-white">
+            <CardFooter className="p-4 border-t dark:border-slate-800 bg-white dark:bg-slate-900">
                 <div className="flex w-full gap-2">
                     {isOutOfCredits ? (
-                        <div className="w-full p-3 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center gap-2 text-red-600">
+                        <div className="w-full p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg flex items-center justify-center gap-2 text-red-600 dark:text-red-400">
                             <AlertCircle size={18} />
                             <p className="text-sm font-medium">Kuota chat habis. Upgrade ke Premium untuk lanjut chat!</p>
                         </div>

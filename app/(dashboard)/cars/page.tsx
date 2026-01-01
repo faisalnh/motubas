@@ -4,8 +4,15 @@ import { db } from '@/lib/db';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Car, Plus } from 'lucide-react';
+import { Car, Plus, PackageOpen } from 'lucide-react';
 import { canAddCar } from '@/lib/subscription';
+import { Metadata } from 'next';
+import { EmptyState } from '@/components/ui/empty-state';
+
+export const metadata: Metadata = {
+  title: 'Mobil Saya | Motubas',
+  description: 'Kelola daftar mobil Anda dan lihat status perawatan masing-masing.',
+};
 
 export default async function CarsPage() {
   const session = await auth();
@@ -41,11 +48,11 @@ export default async function CarsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mobil Saya</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Mobil Saya</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             Kelola informasi mobil Anda
             {user.subscriptionTier === 'FREE' && (
-              <span className="ml-2 text-sm text-gray-500">
+              <span className="ml-2 text-sm text-slate-400 dark:text-slate-500">
                 (Tier FREE: Maksimal 1 mobil)
               </span>
             )}
@@ -62,22 +69,13 @@ export default async function CarsPage() {
       </div>
 
       {user.cars.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Belum Ada Mobil</CardTitle>
-            <CardDescription>
-              Tambahkan mobil pertama Anda untuk mulai melacak riwayat service
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/cars/add">
-              <Button>
-                <Car className="mr-2 h-4 w-4" />
-                Tambah Mobil Pertama
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <EmptyState
+          title="Belum Ada Mobil"
+          description="Tambahkan mobil pertama Anda untuk mulai melacak riwayat service dan pengingat perawatan."
+          icon={PackageOpen}
+          actionLabel="Tambah Mobil Pertama"
+          actionHref="/cars/add"
+        />
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {user.cars.map((car) => {
@@ -92,7 +90,7 @@ export default async function CarsPage() {
                       {car.make} {car.model}
                     </span>
                     {car.isPrimary && (
-                      <span className="text-xs font-normal bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <span className="text-xs font-normal bg-orange-100 text-orange-700 px-2 py-1 rounded">
                         Utama
                       </span>
                     )}
@@ -101,27 +99,27 @@ export default async function CarsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-600">Plat Nomor</p>
-                    <p className="font-medium">{car.licensePlate}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Plat Nomor</p>
+                    <p className="font-medium dark:text-slate-200">{car.licensePlate}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Kilometer Saat Ini</p>
-                    <p className="font-medium">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Kilometer Saat Ini</p>
+                    <p className="font-medium dark:text-slate-200">
                       {car.currentMileage.toLocaleString('id-ID')} km
                     </p>
                   </div>
                   {lastService && (
                     <div>
-                      <p className="text-sm text-gray-600">Service Terakhir</p>
-                      <p className="text-sm">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Service Terakhir</p>
+                      <p className="text-sm dark:text-slate-300">
                         {lastService.serviceType.replace(/_/g, ' ')} •{' '}
                         {new Date(lastService.serviceDate).toLocaleDateString('id-ID')}
                       </p>
                     </div>
                   )}
                   {activeReminders > 0 && (
-                    <div className="bg-amber-50 border border-amber-200 rounded p-3">
-                      <p className="text-sm text-amber-800">
+                    <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded p-3 text-amber-800 dark:text-amber-400">
+                      <p className="text-sm">
                         {activeReminders} pengingat service aktif
                       </p>
                     </div>
@@ -144,16 +142,16 @@ export default async function CarsPage() {
       )}
 
       {!canAdd && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-amber-300/50 dark:border-amber-900/30 bg-gradient-to-r from-amber-50 dark:from-amber-950/20 to-orange-50 dark:to-orange-950/20">
           <CardHeader>
-            <CardTitle className="text-blue-900">Upgrade ke Premium</CardTitle>
-            <CardDescription className="text-blue-700">
+            <CardTitle className="dark:text-amber-100">Upgrade ke Premium</CardTitle>
+            <CardDescription className="dark:text-amber-200/70">
               Anda sudah mencapai batas maksimal mobil untuk tier FREE (1 mobil).
               Upgrade ke PREMIUM untuk menambah lebih banyak mobil.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="default" disabled>
+            <Button variant="default" disabled className="bg-amber-500 opacity-50">
               Upgrade (Segera Hadir)
             </Button>
           </CardContent>

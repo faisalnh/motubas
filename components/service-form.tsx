@@ -176,7 +176,7 @@ export function ServiceForm({ carId, currentMileage, existingRecord }: ServiceFo
                     id="isSelfServiceCheckbox"
                     checked={isSelfService}
                     onChange={(e) => setIsSelfService(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
                     disabled={isLoading}
                 />
                 <Label htmlFor="isSelfServiceCheckbox" className="text-sm font-normal cursor-pointer">

@@ -45,19 +45,19 @@ function getUrgencyLevel(
 
 const urgencyStyles: Record<UrgencyLevel, { border: string; bg: string; icon: string }> = {
     overdue: {
-        border: 'border-red-300',
-        bg: 'bg-red-50',
-        icon: 'text-red-600',
+        border: 'border-red-300 dark:border-red-900/40',
+        bg: 'bg-red-50 dark:bg-red-950/20',
+        icon: 'text-red-600 dark:text-red-400',
     },
     'due-soon': {
-        border: 'border-orange-300',
-        bg: 'bg-orange-50',
-        icon: 'text-orange-600',
+        border: 'border-orange-300 dark:border-orange-900/40',
+        bg: 'bg-orange-50 dark:bg-orange-950/20',
+        icon: 'text-orange-600 dark:text-orange-400',
     },
     normal: {
-        border: 'border-green-200',
-        bg: 'bg-green-50',
-        icon: 'text-green-600',
+        border: 'border-green-200 dark:border-green-900/40',
+        bg: 'bg-green-50 dark:bg-green-950/20',
+        icon: 'text-green-600 dark:text-green-400',
     },
 };
 
@@ -102,9 +102,9 @@ export function ReminderCard({ reminder }: ReminderCardProps) {
                         {urgency === 'normal' && <Check className={`h-4 w-4 ${styles.icon}`} />}
                         <span>{label}</span>
                     </div>
-                    <span className={`text-xs font-normal px-2 py-1 rounded ${urgency === 'overdue' ? 'bg-red-100 text-red-700' :
-                            urgency === 'due-soon' ? 'bg-orange-100 text-orange-700' :
-                                'bg-green-100 text-green-700'
+                    <span className={`text-xs font-normal px-2 py-1 rounded ${urgency === 'overdue' ? 'bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400' :
+                        urgency === 'due-soon' ? 'bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400' :
+                            'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400'
                         }`}>
                         {urgencyLabels[urgency]}
                     </span>
@@ -112,7 +112,7 @@ export function ReminderCard({ reminder }: ReminderCardProps) {
             </CardHeader>
             <CardContent className="space-y-3">
                 {/* Car Info */}
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                     <Car className="h-4 w-4" />
                     <span>{reminder.car.make} {reminder.car.model} • {reminder.car.licensePlate}</span>
                 </div>
@@ -120,21 +120,21 @@ export function ReminderCard({ reminder }: ReminderCardProps) {
                 {/* Due Info */}
                 <div className="grid grid-cols-2 gap-2 text-sm">
                     {reminder.dueDate && (
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-gray-400" />
+                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <Calendar className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                             <span>{formatDate(reminder.dueDate)}</span>
                         </div>
                     )}
                     {reminder.dueMileage && (
-                        <div className="flex items-center gap-2">
-                            <Gauge className="h-4 w-4 text-gray-400" />
+                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <Gauge className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                             <span>{reminder.dueMileage.toLocaleString('id-ID')} km</span>
                         </div>
                     )}
                 </div>
 
                 {/* Current Mileage */}
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-400 dark:text-slate-500">
                     Kilometer saat ini: {reminder.car.currentMileage.toLocaleString('id-ID')} km
                 </p>
 

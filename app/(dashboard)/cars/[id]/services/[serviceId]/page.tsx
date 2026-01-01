@@ -170,7 +170,7 @@ export default async function ServiceDetailPage({
                                 href={serviceRecord.invoicePhotoUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sm text-blue-600 hover:underline"
+                                className="text-sm text-orange-600 hover:underline"
                             >
                                 Lihat ukuran penuh →
                             </a>

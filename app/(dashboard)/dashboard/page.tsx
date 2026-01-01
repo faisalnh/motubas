@@ -8,6 +8,14 @@ import { Car as CarIcon, ArrowRight } from 'lucide-react';
 import { DashboardStats } from '@/components/dashboard/dashboard-stats';
 import { CostChart } from '@/components/dashboard/cost-chart';
 import { ServiceRecord } from '@prisma/client';
+import { Metadata } from 'next';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PackageOpen } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Beranda | Motubas',
+  description: 'Lihat ringkasan biaya service dan status perawatan armada mobil Anda.',
+};
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -85,31 +93,23 @@ export default async function DashboardPage() {
   const hasNoCar = totalCars === 0;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Beranda</h1>
-        <p className="text-gray-600 mt-1">
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="relative">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Beranda</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">
           Analisa biaya dan status perawatan armada Anda
         </p>
       </div>
 
       {hasNoCar ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Belum Ada Mobil</CardTitle>
-            <CardDescription>
-              Tambahkan mobil pertama Anda untuk mulai melacak riwayat service
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/cars/add">
-              <Button>
-                <CarIcon className="mr-2 h-4 w-4" />
-                Tambah Mobil
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <EmptyState
+          title="Belum Ada Mobil"
+          description="Tambahkan mobil pertama Anda untuk mulai melacak riwayat service dan melihat analisa pengeluaran."
+          icon={PackageOpen}
+          actionLabel="Tambah Mobil"
+          actionHref="/cars/add"
+        />
       ) : (
         <>
           <DashboardStats
@@ -119,52 +119,50 @@ export default async function DashboardPage() {
             totalSpent={totalSpent}
           />
 
-          <div className="grid gap-6 md:grid-cols-7">
-            {/* Chart occupies 4 columns */}
-            <CostChart data={chartData} />
+          {/* Chart - Full Width */}
+          <CostChart data={chartData} />
 
-            {/* Recent Activity occupies 3 columns */}
-            <Card className="col-span-3">
-              <CardHeader>
-                <CardTitle>Aktivitas Terbaru</CardTitle>
-                <CardDescription>
-                  5 riwayat service terakhir
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {recentActivity.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    Belum ada riwayat service.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {recentActivity.map((record) => (
-                      <div key={record.id} className="flex items-start justify-between border-b pb-3 last:border-0 last:pb-0">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {record.serviceType.replace(/_/g, ' ')}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {record.carName} • {new Date(record.serviceDate).toLocaleDateString('id-ID')}
-                          </p>
-                        </div>
-                        {record.serviceCost && (
-                          <div className="font-medium text-sm">
-                            Rp{(Number(record.serviceCost) / 1000).toLocaleString('id-ID')}k
-                          </div>
-                        )}
+          {/* Recent Activity - Full Width below chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Aktivitas Terbaru</CardTitle>
+              <CardDescription>
+                5 riwayat service terakhir
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentActivity.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  Belum ada riwayat service.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {recentActivity.map((record) => (
+                    <div key={record.id} className="flex items-start justify-between border-b dark:border-slate-800 pb-3 last:border-0 last:pb-0">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none dark:text-slate-200">
+                          {record.serviceType.replace(/_/g, ' ')}
+                        </p>
+                        <p className="text-xs text-muted-foreground dark:text-slate-500">
+                          {record.carName} • {new Date(record.serviceDate).toLocaleDateString('id-ID')}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                )}
-                <div className="mt-4 pt-4 border-t">
-                  <Link href="/cars" className="flex items-center text-sm text-primary hover:underline">
-                    Lihat semua mobil <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
+                      {record.serviceCost && (
+                        <div className="font-medium text-sm dark:text-slate-300">
+                          Rp{(Number(record.serviceCost) / 1000).toLocaleString('id-ID')}k
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
+              <div className="mt-4 pt-4 border-t dark:border-slate-800">
+                <Link href="/cars" className="flex items-center text-sm text-primary dark:text-orange-500 hover:underline">
+                  Lihat semua mobil <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="flex gap-4">
             <Link href="/cars/add">

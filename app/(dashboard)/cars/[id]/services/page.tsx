@@ -4,7 +4,8 @@ import { db } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { ServiceRecordCard } from '@/components/service-record-card';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Wrench } from 'lucide-react';
+import { ArrowLeft, Plus, Wrench, ClipboardList } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export default async function ServicesPage({
     params,
@@ -46,10 +47,10 @@ export default async function ServicesPage({
                             Kembali
                         </Button>
                     </Link>
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                         Riwayat Service
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="text-slate-500 dark:text-slate-400">
                         {car.make} {car.model} ({car.year}) • {car.licensePlate}
                     </p>
                 </div>
@@ -63,21 +64,13 @@ export default async function ServicesPage({
 
             {/* Service Records */}
             {car.serviceRecords.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <Wrench className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-4 text-lg font-medium text-gray-900">
-                        Belum Ada Riwayat Service
-                    </h3>
-                    <p className="mt-2 text-gray-600">
-                        Mulai catat riwayat service mobil Anda untuk melacak perawatan
-                    </p>
-                    <Link href={`/cars/${carId}/services/add`}>
-                        <Button className="mt-4">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Tambah Service Pertama
-                        </Button>
-                    </Link>
-                </div>
+                <EmptyState
+                    title="Belum Ada Riwayat"
+                    description="Mulai catat riwayat service mobil Anda untuk melacak perawatan secara detail."
+                    icon={ClipboardList}
+                    actionLabel="Tambah Service Pertama"
+                    actionHref={`/cars/${carId}/services/add`}
+                />
             ) : (
                 <div className="grid gap-4 md:grid-cols-2">
                     {car.serviceRecords.map((record) => (

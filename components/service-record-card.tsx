@@ -5,6 +5,7 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import { ServiceType, Prisma } from '@prisma/client';
 import Link from 'next/link';
 import { Wrench, Calendar, Gauge, MapPin, Receipt, AlertTriangle } from 'lucide-react';
+import Image from 'next/image';
 
 interface ServiceRecordCardProps {
     record: {
@@ -46,11 +47,11 @@ export function ServiceRecordCard({ record, showActions = true }: ServiceRecordC
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between text-base">
                     <div className="flex items-center gap-2">
-                        <Wrench className="h-4 w-4 text-blue-600" />
+                        <Wrench className="h-4 w-4 text-slate-600" />
                         <span>{serviceLabel}</span>
                     </div>
                     {record.isSelfService && (
-                        <span className="text-xs font-normal bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        <span className="text-xs font-normal bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded">
                             Self Service
                         </span>
                     )}
@@ -59,23 +60,23 @@ export function ServiceRecordCard({ record, showActions = true }: ServiceRecordC
             <CardContent className="space-y-3">
                 {/* Date and Mileage */}
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <Calendar className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                         <span>{formatDate(record.serviceDate)}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Gauge className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <Gauge className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                         <span>{record.mileageAtService.toLocaleString('id-ID')} km</span>
                     </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-sm text-gray-700 line-clamp-2">{record.description}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-200 line-clamp-2">{record.description}</p>
 
                 {/* Location */}
                 {!record.isSelfService && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <MapPin className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                        <MapPin className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                         <span>{record.serviceLocation}</span>
                     </div>
                 )}
@@ -83,25 +84,25 @@ export function ServiceRecordCard({ record, showActions = true }: ServiceRecordC
                 {/* Cost */}
                 {costValue !== null && costValue > 0 && (
                     <div className="flex items-center gap-2">
-                        <Receipt className="h-4 w-4 text-green-600" />
-                        <span className="font-semibold text-green-700">{formatCurrency(costValue)}</span>
+                        <Receipt className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <span className="font-semibold text-green-700 dark:text-green-400">{formatCurrency(costValue)}</span>
                     </div>
                 )}
 
                 {/* Invoice Photo Thumbnail */}
                 {record.invoicePhotoUrl && (
-                    <div className="mt-2">
+                    <div className="mt-2 text-slate-500 dark:text-slate-400">
                         <a
                             href={record.invoicePhotoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-block"
+                            className="inline-block relative w-20 h-20"
                         >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                            <Image
                                 src={record.invoicePhotoUrl}
                                 alt="Nota service"
-                                className="w-20 h-20 object-cover rounded border hover:opacity-80 transition-opacity"
+                                fill
+                                className="object-cover rounded border dark:border-slate-800 hover:opacity-80 transition-opacity"
                             />
                         </a>
                     </div>
@@ -109,7 +110,7 @@ export function ServiceRecordCard({ record, showActions = true }: ServiceRecordC
 
                 {/* Backdating Warning */}
                 {isBackdated && (
-                    <div className="flex items-start gap-2 text-xs text-orange-600 bg-orange-50 p-2 rounded">
+                    <div className="flex items-start gap-2 text-xs text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/20 p-2 rounded border border-orange-100 dark:border-orange-900/30">
                         <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                         <span>
                             Data dimasukkan pada: {formatDateTime(record.createdAt)}
